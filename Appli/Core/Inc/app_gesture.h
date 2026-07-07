@@ -116,6 +116,7 @@ app_sign_result_t app_sign_update(app_sign_state_t *state,
                                   uint32_t now_ms);
 const char *app_sign_phrase_id(app_sign_phrase_t phrase);
 const char *app_sign_phrase_text(app_sign_phrase_t phrase);
+const char *app_sign_phrase_lcd_text(app_sign_phrase_t phrase);
 const char *app_sign_gesture_name(app_sign_phrase_t phrase);
 uint32_t app_sign_confirm_hold_ms(void);
 uint32_t app_sign_repeat_cooldown_ms(void);

@@ -136,6 +136,7 @@ static void app_ld_to_roi(ld_point_t lm[LD_LANDMARKS_NB], app_roi_t *roi, pd_pp_
 static void app_compute_next_roi(app_roi_t *src, ld_point_t lm_in[LD_LANDMARKS_NB], app_roi_t *next, pd_pp_box_t *next_pd);
 static void app_copy_pd_box(pd_pp_box_t *dst, pd_pp_box_t *src);
 static void app_cvt_pd_coord_to_screen_coord(pd_pp_box_t *box);
+static void app_emit_boot_log(void);
 static void app_emit_sign_log(app_sign_result_t *sign, uint32_t now_ms);
 static void app_sign_success_feedback(uint32_t now_ms);
 static void app_sign_feedback_poll(uint32_t now_ms);
@@ -160,6 +161,7 @@ void app_run(void)
     app_bqueue_init(&nn_input_queue, 2, (uint8_t *[2]){nn_input_buffers[0], nn_input_buffers[1]});
     app_cpuload_init(&cpuload);
     app_camera_init(app_camera_display_pipe_vsync_cb, app_camera_display_pipe_frame_cb, NULL, app_camera_nn_pipe_frame_cb);
+    app_emit_boot_log();
 
     tx_semaphore_create(&isp_semaphore, NULL, 0);
     tx_semaphore_create(&display.update, NULL, 0);
@@ -451,7 +453,7 @@ static void app_display_network_output(app_display_info_t *display_info)
                         display_info->sign.confirmed ? "OK" : "WAIT");
     line_nb += 1;
     UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "%s",
-                        app_sign_phrase_text(display_info->sign.phrase));
+                        app_sign_phrase_lcd_text(display_info->sign.phrase));
     line_nb += 1;
     UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "Cool %s",
                         display_info->sign.cooldown ? "ON" : "OFF");
@@ -466,6 +468,27 @@ static void app_display_network_output(app_display_info_t *display_info)
     }
 
     app_lcd_draw_area_commit();
+}
+
+static void app_emit_boot_log(void)
+{
+    char line[128];
+    int len;
+
+    len = snprintf(line, sizeof(line),
+                   "{\"t\":%lu,\"ver\":1002,\"event\":\"boot\",\"hold_ms\":%lu,\"cooldown_ms\":%lu}\r\n",
+                   (unsigned long)HAL_GetTick(),
+                   (unsigned long)app_sign_confirm_hold_ms(),
+                   (unsigned long)app_sign_repeat_cooldown_ms());
+
+    if (len > 0)
+    {
+        if (len >= (int)sizeof(line))
+        {
+            len = (int)sizeof(line) - 1;
+        }
+        HAL_UART_Transmit(&huart1, (uint8_t *)line, (uint16_t)len, 10);
+    }
 }
 
 static void app_emit_sign_log(app_sign_result_t *sign, uint32_t now_ms)

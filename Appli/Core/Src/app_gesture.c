@@ -646,6 +646,35 @@ const char *app_sign_phrase_text(app_sign_phrase_t phrase)
     }
 }
 
+const char *app_sign_phrase_lcd_text(app_sign_phrase_t phrase)
+{
+    switch (phrase)
+    {
+    case APP_SIGN_G01_HELLO:
+        return "NI HAO";
+    case APP_SIGN_G02_THANKS:
+        return "XIE XIE";
+    case APP_SIGN_G03_NEED_HELP:
+        return "NEED HELP";
+    case APP_SIGN_G04_UNCOMFORTABLE:
+        return "UNCOMFORT";
+    case APP_SIGN_G05_WAIT:
+        return "WAIT";
+    case APP_SIGN_G06_WATER:
+        return "WATER";
+    case APP_SIGN_G07_CONTACT_FAMILY:
+        return "CALL FAMILY";
+    case APP_SIGN_G08_YES:
+        return "YES";
+    case APP_SIGN_G09_NO:
+        return "NO";
+    case APP_SIGN_G10_EMERGENCY:
+        return "EMERGENCY";
+    default:
+        return "NO RESULT";
+    }
+}
+
 const char *app_sign_gesture_name(app_sign_phrase_t phrase)
 {
     switch (phrase)
